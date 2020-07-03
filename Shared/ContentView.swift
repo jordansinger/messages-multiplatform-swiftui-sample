@@ -98,12 +98,22 @@ struct MessageView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(spacing: 12) {
-                    ForEach(0..<messages.count, id: \.self) { i in
-                        ChatBubbleView(message: messages[i], index: i)
+                // Add the new scroll view reader as a child to the scrollview
+                ScrollViewReader { scrollView in
+                    VStack(spacing: 12) {
+                        ForEach(0..<messages.count, id: \.self) { i in
+                            ChatBubbleView(message: messages[i], index: i)
+                        }
+                    }
+                    .padding()
+                    // Add a listener to the messages array to listen for changes
+                    .onReceive(messages.publisher) { _ in
+                        // Add animation block to animate in new message
+                        withAnimation {
+                            scrollView.scrollTo(messages.endIndex - 1)
+                        }
                     }
                 }
-                .padding()
             }
             
             TextField("iMessage", text: $message, onCommit: { self.sendMessage() })
